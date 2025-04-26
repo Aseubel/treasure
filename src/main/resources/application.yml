@@ -1,0 +1,5 @@
+spring:
+  config:
+    name: traesure-app
+  profiles:
+    active: dev
