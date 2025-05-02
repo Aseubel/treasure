@@ -1,6 +1,6 @@
 package com.aseubel.treasure.service.impl;
 
-import com.aseubel.treasure.dto.CollectionDTO;
+import com.aseubel.treasure.dto.collection.CollectionDTO;
 import com.aseubel.treasure.entity.Collection;
 import com.aseubel.treasure.entity.CollectionTag;
 import com.aseubel.treasure.mapper.CollectionMapper;
@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional; // 导入事务
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collection> implements CollectionService {
@@ -33,7 +32,12 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
         if (tagIds == null || tagIds.isEmpty()) {
             return true; // 没有标签需要添加
         }
-        // TODO: 校验 collectionId 和 tagIds 是否有效，以及是否属于当前用户
+        // TODO: 校验 collectionId 是否属于当前用户
+        // 校验 collectionId 是否有效，以及是否属于当前用户
+        Collection collection = collectionMapper.selectById(collectionId);
+        if (collection == null) {
+            return false; // 藏品不存在
+        }
 
         // 过滤掉已经存在的关联关系，避免重复插入
         QueryWrapper<CollectionTag> queryWrapper = new QueryWrapper<>();
@@ -54,15 +58,9 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
                 }).toList();
 
         if (!newTags.isEmpty()) {
-            // MyBatis Plus 没有直接提供批量插入，需要自己实现或循环插入
-            // 这里简单循环插入，对于大量数据可能需要优化
-            int insertedCount = 0;
-            for (CollectionTag ct : newTags) {
-                insertedCount += collectionTagMapper.insert(ct);
-            }
-            return insertedCount == newTags.size();
+            collectionTagMapper.insert(newTags);
         }
-        return true; // 没有新的标签需要添加
+        return true;
     }
 
     @Override
@@ -114,6 +112,12 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
 
         // baseMapper 是 ServiceImpl 中注入的 CollectionMapper
         return baseMapper.selectPage(page, queryWrapper);
+    }
+
+    @Override
+    public boolean removeCollectionTag(Long tagId) {
+        collectionTagMapper.delete(new QueryWrapper<CollectionTag>().eq("tag_id", tagId));
+        return true;
     }
 
     // 实现 CollectionService 中定义的其他业务方法

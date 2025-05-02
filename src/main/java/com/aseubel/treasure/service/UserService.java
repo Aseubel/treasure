@@ -14,4 +14,11 @@ public interface UserService extends IService<User> {
      * @throws RuntimeException 如果用户名已存在
      */
     User registerUser(User user) throws RuntimeException;
+
+    /**
+     * 获取用户ID
+     *
+     * @return 用户ID
+     */
+    Long getUserId();
 }

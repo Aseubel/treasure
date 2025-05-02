@@ -1,12 +1,10 @@
 package com.aseubel.treasure.mapper;
 
-import com.aseubel.treasure.dto.CollectionDTO;
+import com.aseubel.treasure.dto.collection.CollectionDTO;
 import com.aseubel.treasure.entity.Collection;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-
-import java.util.List;
 
 public interface CollectionMapper extends BaseMapper<Collection> {
 

@@ -1,8 +1,6 @@
-package com.aseubel.treasure.entity;
+package com.aseubel.treasure.dto.collection;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.aseubel.treasure.entity.Collection;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -10,26 +8,18 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * @author Aseubel
+ * @date 2025/5/2 下午2:03
+ */
 @Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@TableName("collections")
-public class Collection {
-
-    @TableId(value = "collection_id", type = IdType.AUTO)
-    private Long collectionId;
-
-    private Long userId;
+public class CreateCollectionRequest {
 
     private String name;
 
@@ -49,8 +39,15 @@ public class Collection {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime createdAt;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    private LocalDateTime updatedAt;
+    public Collection convertToEntity() {
+        return Collection.builder()
+                .name(name)
+                .purchaseDate(purchaseDate)
+                .purchasePrice(purchasePrice)
+                .type(type)
+                .notes(notes)
+                .createdAt(createdAt)
+                .updatedAt(createdAt)
+                .build();
+    }
 }

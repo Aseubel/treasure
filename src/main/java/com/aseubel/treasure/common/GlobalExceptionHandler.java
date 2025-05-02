@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @RestControllerAdvice // 声明这是一个全局异常处理组件，结合了 @ControllerAdvice 和 @ResponseBody
@@ -23,6 +24,19 @@ public class GlobalExceptionHandler {
         // 可以根据不同的异常类型返回更具体的错误信息和状态码
         // 例如： if (e instanceof YourCustomException) { ... }
         return Result.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "服务器内部错误，请联系管理员");
+    }
+
+    /**
+     * 处理错误路径异常
+     *
+     * @param e 异常对象
+     * @return 统一错误结果
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Result<String> handleNoResourceFoundException(NoResourceFoundException e) {
+        log.warn("请求路径不存在: {}", e.getMessage()); // 记录警告日志
+        return Result.error(HttpStatus.NOT_FOUND.value(), "请求路径不存在");
     }
 
     /**

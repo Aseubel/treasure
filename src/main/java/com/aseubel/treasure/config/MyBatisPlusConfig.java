@@ -1,10 +1,12 @@
 package com.aseubel.treasure.config;
 
-import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor; // 导入拦截器
-import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor; // 导入分页内部拦截器
+import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.context.annotation.Bean; // 导入 @Bean
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @MapperScan("com.aseubel.treasure.mapper") // 指定 Mapper 接口所在的包

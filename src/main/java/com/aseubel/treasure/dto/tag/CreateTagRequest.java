@@ -1,24 +1,21 @@
-package com.aseubel.treasure.entity;
+package com.aseubel.treasure.dto.tag;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.aseubel.treasure.entity.Tag;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
+/**
+ * @author Aseubel
+ * @date 2025/5/2 下午2:37
+ */
 @Data
-@TableName("tags")
-public class Tag {
-
-    @TableId(value = "tag_id", type = IdType.AUTO)
-    private Long tagId;
-
-    private Long userId;
+public class CreateTagRequest {
 
     private String tagName;
 
@@ -28,4 +25,12 @@ public class Tag {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime createdAt;
+
+    public Tag toEntity() {
+        Tag tag = new Tag();
+        tag.setTagName(tagName);
+        tag.setCreatedAt(createdAt);
+        tag.setDescription(description);
+        return tag;
+    }
 }

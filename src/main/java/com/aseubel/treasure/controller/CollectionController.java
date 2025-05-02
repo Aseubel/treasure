@@ -1,10 +1,13 @@
 package com.aseubel.treasure.controller;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.aseubel.treasure.common.PageResult;
 import com.aseubel.treasure.common.Result;
-import com.aseubel.treasure.dto.CollectionDTO; // 导入 DTO
+import com.aseubel.treasure.dto.collection.*;
 import com.aseubel.treasure.entity.Collection;
 import com.aseubel.treasure.service.CollectionService;
+import com.aseubel.treasure.service.UserService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/collections")
 public class CollectionController {
@@ -20,15 +24,22 @@ public class CollectionController {
     @Autowired
     private CollectionService collectionService;
 
-    // 获取所有藏品 (支持分页)
+    @Autowired
+    private UserService userService;
+
+    /**
+     * 获取所有藏品信息
+     * @param pageNum 页码
+     * @param pageSize 每页数量
+     * @return Result
+     */
     @GetMapping
     public Result<PageResult<Collection>> getAllCollections(
             @RequestParam(defaultValue = "1") long pageNum, // 页码，默认为 1
             @RequestParam(defaultValue = "10") long pageSize // 每页数量，默认为 10
     // @RequestParam(required = false) Long userId // 如果需要根据用户过滤，添加此参数
     ) {
-        // TODO: 实际应用中应从认证信息中获取 userId，而不是通过请求参数传递
-        Long currentUserId = null; // 暂时设为 null，后续从认证获取
+        Long currentUserId = userService.getUserId();
 
         // 创建 MyBatis Plus 的 Page 对象
         Page<Collection> page = new Page<>(pageNum, pageSize);
@@ -42,23 +53,33 @@ public class CollectionController {
         return Result.success(pageResult);
     }
 
-    // 根据 ID 获取藏品 (返回带标签的 DTO)
+    /**
+     * 获取藏品信息
+     * @param id 藏品 ID
+     * @return Result
+     */
     @GetMapping("/{id}")
     public Result<CollectionDTO> getCollectionById(@PathVariable Long id) {
         CollectionDTO collectionDTO = collectionService.getCollectionWithTags(id); // 调用新方法
         if (collectionDTO != null) {
-            // TODO: 校验是否属于当前用户
+            if (!validate(id, userService.getUserId())) {
+                return Result.error(403, "无权操作");
+            }
             return Result.success(collectionDTO);
         } else {
             return Result.error(404, "藏品未找到");
         }
     }
 
-    // 创建藏品
+    /**
+     * 创建藏品
+     * @param request 藏品信息
+     * @return Result
+     */
     @PostMapping
-    public Result<Collection> createCollection(@RequestBody Collection collection) {
-        // TODO: 设置 userId 为当前登录用户 ID
-        // collection.setUserId(getCurrentUserId());
+    public Result<Collection> createCollection(@RequestBody CreateCollectionRequest request) {
+        Collection collection = request.convertToEntity();
+        collection.setUserId(userService.getUserId());
         boolean success = collectionService.save(collection);
         if (success) {
             return Result.success("藏品创建成功", collection);
@@ -67,10 +88,20 @@ public class CollectionController {
         }
     }
 
-    // 更新藏品 (不处理标签，标签通过专门接口管理)
-    @PutMapping("/{id}")
-    public Result<Collection> updateCollection(@PathVariable Long id, @RequestBody Collection collection) {
-        // TODO: 校验该藏品是否属于当前用户
+    /**
+     * 更新藏品
+     * 注意：更新时不包括标签信息，标签需要单独接口处理
+     * @param request 藏品信息
+     * @return Result
+     */
+    @PutMapping("")
+    public Result<Collection> updateCollection(@RequestBody UpdateCollectionRequest request) {
+        Collection collection = request.convertToEntity();
+        Long id = collection.getCollectionId();
+
+        if (!validate(id, userService.getUserId())) {
+            return Result.error(403, "无权操作");
+        }
         collection.setCollectionId(id);
         // 注意：这个更新不包括标签信息，标签需要单独接口处理
         boolean success = collectionService.updateById(collection);
@@ -81,11 +112,18 @@ public class CollectionController {
         }
     }
 
-    // 删除藏品 (Service 实现已包含删除关联标签的逻辑)
+    /**
+     * 删除藏品
+     *
+     * @param id 藏品 ID
+     * @return Result
+     */
     @DeleteMapping("/{id}")
     public Result<Void> deleteCollection(@PathVariable Long id) {
-        // TODO: 校验该藏品是否属于当前用户
-        boolean success = collectionService.removeById(id); // 调用重写后的 removeById
+        if (!validate(id, userService.getUserId())) {
+            return Result.error(403, "无权删除");
+        }
+        boolean success = collectionService.removeById(id);
         if (success) {
             return Result.success();
         } else {
@@ -98,13 +136,17 @@ public class CollectionController {
     /**
      * 为指定藏品添加标签
      * 
-     * @param id     藏品ID
-     * @param tagIds 请求体中包含要添加的标签ID列表，例如：[1, 2, 3]
+     * @param request 请求，包含藏品 ID 和标签 ID 列表
      * @return Result
      */
-    @PostMapping("/{id}/tags")
-    public Result<?> addTagsToCollection(@PathVariable Long id, @RequestBody List<Long> tagIds) {
-        // TODO: 校验藏品和标签是否属于当前用户
+    @PostMapping("/tags")
+    public Result<?> addTagsToCollection(@RequestBody AddTagsRequest request) {
+        Long id = request.getCollectionId();
+        List<Long> tagIds = request.getTagIds();
+
+        if (!validate(id, userService.getUserId())) {
+            return Result.error(403, "无权操作");
+        }
         boolean success = collectionService.addTagsToCollection(id, tagIds);
         if (success) {
             return Result.success("标签添加成功");
@@ -117,19 +159,36 @@ public class CollectionController {
     /**
      * 从指定藏品移除标签
      * 
-     * @param id     藏品ID
-     * @param tagIds 请求体中包含要移除的标签ID列表，例如：[1, 2]
+     * @param request 请求，包含藏品 ID 和标签 ID 列表
      * @return Result
      */
-    @DeleteMapping("/{id}/tags")
-    public Result<?> removeTagsFromCollection(@PathVariable Long id, @RequestBody List<Long> tagIds) {
-        // TODO: 校验藏品是否属于当前用户
+    @DeleteMapping("/tags")
+    public Result<?> removeTagsFromCollection(@RequestBody DeleteTagsRequest request) {
+        Long id = request.getCollectionId();
+        List<Long> tagIds = request.getTagIds();
+
+        if (!validate(id, userService.getUserId())) {
+            return Result.error(403, "无权操作");
+        }
         boolean success = collectionService.removeTagsFromCollection(id, tagIds);
         if (success) {
             return Result.success("标签移除成功");
         } else {
             return Result.error("标签移除失败");
         }
+    }
+
+    /**
+     * 校验该藏品是否属于当前用户
+     * @param collectionId 藏品 ID
+     * @param userId 用户 ID
+     * @return true 属于当前用户，false 不是当前用户
+     */
+    private boolean validate(Long collectionId, Long userId) {
+        return ObjectUtil.isNotEmpty(collectionService
+                .getOne(new QueryWrapper<Collection>()
+                        .eq("collection_id", collectionId)
+                        .eq("user_id", userId)));
     }
 
 }

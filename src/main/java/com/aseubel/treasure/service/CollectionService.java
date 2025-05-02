@@ -1,6 +1,6 @@
 package com.aseubel.treasure.service;
 
-import com.aseubel.treasure.dto.CollectionDTO;
+import com.aseubel.treasure.dto.collection.CollectionDTO;
 import com.aseubel.treasure.entity.Collection;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -46,6 +46,13 @@ public interface CollectionService extends IService<Collection> {
      */
     IPage<Collection> getCollectionsByPage(Page<Collection> page, Long userId); // 可以根据需要决定是否传入 userId
 
+    /**
+     * 移除藏品标签
+     *
+     * @param tagId 标签ID
+     * @return 是否成功
+     */
+    boolean removeCollectionTag(Long tagId);
     // 可以添加更新藏品标签的方法（先移除旧的，再添加新的）
     // boolean updateCollectionTags(Long collectionId, List<Long> tagIds);
 }

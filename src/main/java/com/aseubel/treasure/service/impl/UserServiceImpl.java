@@ -3,8 +3,15 @@ package com.aseubel.treasure.service.impl;
 import com.aseubel.treasure.entity.User;
 import com.aseubel.treasure.mapper.UserMapper;
 import com.aseubel.treasure.service.UserService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
@@ -20,7 +27,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (baseMapper.exists(queryWrapper)) {
             throw new RuntimeException("用户名 '" + user.getUsername() + "' 已被注册");
         }
-        // TODO: 可以添加邮箱唯一性校验等
 
         // 2. 对密码进行加密
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -40,6 +46,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return user;
     }
 
-    // 实现 UserService 中定义的其他业务方法
-    // ServiceImpl<UserMapper, User> 提供了基础 CRUD 方法的实现
+    @Override
+    public Long getUserId() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return baseMapper.selectOne(new QueryWrapper<User>().eq("username", username)).getUserId();
+    }
 }

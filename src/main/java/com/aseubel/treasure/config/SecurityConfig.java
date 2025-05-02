@@ -1,5 +1,6 @@
 package com.aseubel.treasure.config;
 
+import com.aseubel.treasure.service.impl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer; // 导入 AbstractHttpConfigurer
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.password.PasswordEncoder; // 确保导入 PasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 // import org.springframework.web.cors.CorsConfiguration; // 如果需要 CORS
@@ -30,7 +31,7 @@ public class SecurityConfig {
     private UserDetailsServiceImpl userDetailsService; // 注入 UserDetailsService 实现
 
     @Autowired
-    private PasswordEncoder passwordEncoder; // 注入之前配置的密码编码器
+    private PasswordEncoder passwordEncoder; // 注入密码加密器
 
     /**
      * 配置安全过滤器链

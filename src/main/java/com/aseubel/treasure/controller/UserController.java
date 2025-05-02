@@ -18,9 +18,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/users")
-@Slf4j // 添加日志注解
 public class UserController {
 
     @Autowired
@@ -35,10 +36,11 @@ public class UserController {
     @Autowired
     private UserDetailsService userDetailsService; // 注入 UserDetailsService
 
-    // --- 注册接口 ---
+    /**
+     * 注册用户
+     */
     @PostMapping("/register")
     public Result<User> registerUser(@RequestBody User user) {
-        // TODO: 添加更严格的输入校验 (例如使用 @Valid 和 DTO)
         if (user.getUsername() == null || user.getUsername().isEmpty() || user.getPassword() == null
                 || user.getPassword().isEmpty()) {
             return Result.error(400, "用户名和密码不能为空");
@@ -57,7 +59,9 @@ public class UserController {
         }
     }
 
-    // --- 登录接口 ---
+    /**
+     * 登录
+     */
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody LoginRequest loginRequest) throws Exception {
         try {
@@ -84,9 +88,9 @@ public class UserController {
         return ResponseEntity.ok(new LoginResponse(jwt));
     }
 
-    // === 以下是之前的 CRUD 接口 (现在需要认证才能访问) ===
-
-    // 获取所有用户
+    /**
+     * 获取所有用户
+     */
     @GetMapping
     // @PreAuthorize("hasRole('ADMIN')") // 示例：添加方法级权限控制，需要配置角色
     public Result<List<User>> getAllUsers() {
@@ -96,7 +100,9 @@ public class UserController {
         return Result.success(users);
     }
 
-    // 根据 ID 获取用户
+    /**
+     * 获取用户信息
+     */
     @GetMapping("/{id}")
     public Result<User> getUserById(@PathVariable Long id) {
         // TODO: 添加权限检查，例如只能获取自己的信息或管理员才能获取
@@ -124,11 +130,15 @@ public class UserController {
      * }
      */
 
-    // 更新用户
+    /**
+     * 更新用户信息
+     */
     @PutMapping("/{id}")
-    public Result<User> updateUser(@PathVariable Long id, @RequestBody User user) {
+    public Result<User> updateUser(@PathVariable Long id, @RequestParam String email) {
         // TODO: 添加权限检查，例如只能更新自己的信息或管理员才能更新
         // TODO: 处理密码更新逻辑（如果允许更新密码）
+        User user = new User();
+        user.setEmail(email);
         user.setUserId(id); // 确保更新的是指定 ID 的用户
         user.setPassword(null); // 不允许通过此接口直接更新密码原文
         user.setUsername(null); // 通常不允许修改用户名
@@ -145,7 +155,9 @@ public class UserController {
         }
     }
 
-    // 删除用户
+    /**
+     * 删除用户
+     */
     @DeleteMapping("/{id}")
     // @PreAuthorize("hasRole('ADMIN')") // 示例：只有管理员能删除
     public Result<Void> deleteUser(@PathVariable Long id) {
