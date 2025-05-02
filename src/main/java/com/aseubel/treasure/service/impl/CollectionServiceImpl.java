@@ -1,10 +1,13 @@
 package com.aseubel.treasure.service.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.aseubel.treasure.dto.collection.CollectionDTO;
 import com.aseubel.treasure.entity.Collection;
 import com.aseubel.treasure.entity.CollectionTag;
+import com.aseubel.treasure.entity.Tag;
 import com.aseubel.treasure.mapper.CollectionMapper;
 import com.aseubel.treasure.mapper.CollectionTagMapper;
+import com.aseubel.treasure.mapper.TagMapper;
 import com.aseubel.treasure.service.CollectionService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -25,6 +28,9 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
 
     @Autowired // 注入 CollectionMapper 以便调用自定义方法
     private CollectionMapper collectionMapper;
+
+    @Autowired
+    private TagMapper tagMapper;
 
     @Override
     @Transactional // 添加事务管理，确保操作的原子性
@@ -83,8 +89,17 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
     @Override
     public CollectionDTO getCollectionWithTags(Long collectionId) {
         // TODO: 校验 collectionId 是否有效，以及是否属于当前用户
-        // 调用 Mapper 中的自定义方法
-        return collectionMapper.findCollectionWithTagsById(collectionId);
+        Collection collection = collectionMapper.selectById(collectionId);
+        if (ObjectUtil.isEmpty(collection)) {
+            return null; // 藏品不存在
+        }
+        List<Long> tagIds = collectionTagMapper.selectList(new QueryWrapper<CollectionTag>()
+                .eq("collection_id", collectionId))
+                .stream()
+                .map(CollectionTag::getTagId)
+                .toList();
+        List<Tag> tags = tagMapper.selectList(new QueryWrapper<Tag>().in("tag_id", tagIds));
+        return new CollectionDTO(collection, tags);
     }
 
     // 如果需要重写删除藏品的方法，以同时删除关联标签
