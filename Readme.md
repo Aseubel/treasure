@@ -17,7 +17,7 @@
 - **Web 框架**：Spring Boot 3.4.4
 - **安全框架**：Spring Security
 - **ORM 框架**：MyBatis-Plus 3.5.12
-- **数据库**：MySQL 8.0+
+- **数据库**：MySQL 8.0+（[dev](./src/main/resources/application-dev.yml)），支持 Oracle 数据库（[pro](./src/main/resources/application-pro.yml)）
 - **认证方式**：JWT (JSON Web Token) 0.11.5
 - **构建工具**：Maven
 - **其他工具库**：

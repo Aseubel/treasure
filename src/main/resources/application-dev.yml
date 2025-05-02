@@ -39,7 +39,7 @@ mybatis-plus:
 #  mapper-locations: classpath*:/mapper/**/*.xml # 如果使用 XML 文件，指定路径
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 开发时方便查看 SQL
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 开发时方便查看 SQL
   global-config:
     db-config:
       id-type: auto # 全局主键策略
