@@ -2,8 +2,9 @@ package com.aseubel.treasure.controller;
 
 import com.aseubel.treasure.common.JwtUtil; // 导入 JwtUtil
 import com.aseubel.treasure.common.Result;
-import com.aseubel.treasure.dto.LoginRequest; // 导入 LoginRequest
-import com.aseubel.treasure.dto.LoginResponse; // 导入 LoginResponse
+import com.aseubel.treasure.dto.user.LoginRequest; // 导入 LoginRequest
+import com.aseubel.treasure.dto.user.LoginResponse; // 导入 LoginResponse
+import com.aseubel.treasure.dto.user.UpdateUserRequest;
 import com.aseubel.treasure.entity.User;
 import com.aseubel.treasure.service.UserService;
 import lombok.extern.slf4j.Slf4j; // 导入 Slf4j
@@ -106,7 +107,8 @@ public class UserController {
     @GetMapping("/{id}")
     public Result<User> getUserById(@PathVariable Long id) {
         // TODO: 添加权限检查，例如只能获取自己的信息或管理员才能获取
-        User user = userService.getById(id);
+        Long userId = userService.getUserId();
+        User user = userService.getById(userId);
         if (user != null) {
             user.setPassword(null); // 不返回密码
             return Result.success(user);
@@ -134,18 +136,19 @@ public class UserController {
      * 更新用户信息
      */
     @PutMapping("/{id}")
-    public Result<User> updateUser(@PathVariable Long id, @RequestParam String email) {
+    public Result<User> updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest request) {
+        Long userId = userService.getUserId();
         // TODO: 添加权限检查，例如只能更新自己的信息或管理员才能更新
         // TODO: 处理密码更新逻辑（如果允许更新密码）
         User user = new User();
-        user.setEmail(email);
-        user.setUserId(id); // 确保更新的是指定 ID 的用户
+        user.setEmail(request.getEmail());
+        user.setUserId(userId); // 确保更新的是指定 ID 的用户
         user.setPassword(null); // 不允许通过此接口直接更新密码原文
         user.setUsername(null); // 通常不允许修改用户名
         // 可以在这里添加校验逻辑
         boolean success = userService.updateById(user);
         if (success) {
-            User updatedUser = userService.getById(id); // 获取更新后的信息
+            User updatedUser = userService.getById(userId); // 获取更新后的信息
             if (updatedUser != null)
                 updatedUser.setPassword(null);
             return Result.success("用户更新成功", updatedUser);

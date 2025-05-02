@@ -1,4 +1,4 @@
-package com.aseubel.treasure.dto;
+package com.aseubel.treasure.dto.user;
 
 import lombok.Data;
 

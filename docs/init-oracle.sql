@@ -1,5 +1,5 @@
 -- 用户信息表
-DROP TABLE users CASCADE CONSTRAINTS;
+-- DROP TABLE users CASCADE CONSTRAINTS;
 
 -- 创建用户表
 CREATE TABLE users (
@@ -11,7 +11,7 @@ CREATE TABLE users (
 );
 
 -- 创建序列
-DROP SEQUENCE users_seq;
+-- DROP SEQUENCE users_seq;
 CREATE SEQUENCE users_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
 
 -- 创建触发器实现自增
@@ -31,7 +31,7 @@ ALTER TABLE users ADD CONSTRAINT uk_username UNIQUE (username);
 ALTER TABLE users ADD CONSTRAINT uk_email UNIQUE (email);
 
 -- 收藏品信息表
-DROP TABLE collections CASCADE CONSTRAINTS;
+-- DROP TABLE collections CASCADE CONSTRAINTS;
 
 -- 创建收藏品表
 CREATE TABLE collections (
@@ -47,7 +47,7 @@ CREATE TABLE collections (
 );
 
 -- 创建序列
-DROP SEQUENCE collections_seq;
+-- DROP SEQUENCE collections_seq;
 CREATE SEQUENCE collections_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
 
 -- 创建触发器实现自增
@@ -74,7 +74,7 @@ END;
 CREATE INDEX ind_user_id ON collections(user_id);
 
 -- 标签表
-DROP TABLE tags CASCADE CONSTRAINTS;
+-- DROP TABLE tags CASCADE CONSTRAINTS;
 
 -- 创建标签表
 CREATE TABLE tags (
@@ -86,7 +86,7 @@ CREATE TABLE tags (
 );
 
 -- 创建序列
-DROP SEQUENCE tags_seq;
+-- DROP SEQUENCE tags_seq;
 CREATE SEQUENCE tags_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
 
 -- 创建触发器实现自增
@@ -106,7 +106,7 @@ ALTER TABLE tags ADD CONSTRAINT uk_user_id_tag_name UNIQUE (user_id, tag_name);
 CREATE INDEX ind_user_id ON tags(user_id);
 
 -- 收藏品 - 标签关联表
-DROP TABLE collection_tags CASCADE CONSTRAINTS;
+-- DROP TABLE collection_tags CASCADE CONSTRAINTS;
 
 -- 创建收藏品-标签关联表
 CREATE TABLE collection_tags (
@@ -117,7 +117,7 @@ CREATE TABLE collection_tags (
 );
 
 -- 创建序列
-DROP SEQUENCE collection_tags_seq;
+-- DROP SEQUENCE collection_tags_seq;
 CREATE SEQUENCE collection_tags_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
 
 -- 创建触发器实现自增
