@@ -1,5 +1,6 @@
 package com.aseubel.treasure.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.aseubel.treasure.dto.collection.CollectionDTO;
 import com.aseubel.treasure.entity.Collection;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // 导入事务注解
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -98,8 +100,11 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
                 .stream()
                 .map(CollectionTag::getTagId)
                 .toList();
-        List<Tag> tags = tagMapper.selectList(new QueryWrapper<Tag>().in("tag_id", tagIds));
-        return new CollectionDTO(collection, tags);
+        if (CollectionUtil.isNotEmpty(tagIds)) {
+            List<Tag> tags = tagMapper.selectList(new QueryWrapper<Tag>().in("tag_id", tagIds));
+            return new CollectionDTO(collection, tags);
+        }
+        return new CollectionDTO(collection, Collections.emptyList());
     }
 
     // 如果需要重写删除藏品的方法，以同时删除关联标签
